@@ -1,6 +1,6 @@
 <template>
   <v-avatar class="logo" tile :size="size">
-    <v-img src="../../assets/whatsapp-ok.png"></v-img>
+    <v-img src="../../assets/nas.jpg"></v-img>
   </v-avatar>
 </template>
 

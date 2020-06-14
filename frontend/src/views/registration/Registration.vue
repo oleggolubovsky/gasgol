@@ -4,15 +4,15 @@
       <v-row class="align-center">
         <v-col>
           <v-layout align-center justify-center column v-if="!info">
-            <v-card width="450" flat class="text-left">
+            <v-card width="420" flat class="text-left">
               <v-card-text>
-                Already have an account?
-                <router-link to="/login">Log in.</router-link>
+                Вы уже зарегистрированы?
+                <router-link to="/login">Вход.</router-link>
               </v-card-text>
             </v-card>
-            <v-card class="mb-5 form" width="450">
+            <v-card class="mb-5 form" width="420">
               <v-toolbar color="white justify-center" flat>
-                <v-toolbar-title>Регистрация нового пользователя</v-toolbar-title>
+                <v-toolbar-title>Регистрация новой организации</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <logo size="74" />
               </v-toolbar>
@@ -20,22 +20,14 @@
                 <v-card-text>
                   <v-text-field
                     v-model="firstName"
-                    label="First Name"
+                    label="Название организации"
                     prepend-icon="mdi-account"
-                    maxlength="20"
+                    maxlength="50"
                     required
                     :error="inputsError.firstName"
                     :rules="nameRules"
                   ></v-text-field>
-                  <v-text-field
-                    v-model="lastName"
-                    label="Last Name"
-                    prepend-icon="mdi-account"
-                    maxlength="20"
-                    required
-                    :error="inputsError.lastName"
-                    :rules="nameRules"
-                  ></v-text-field>
+
                   <v-text-field
                     v-model="email"
                     label="E-mail"
@@ -51,7 +43,7 @@
                 <v-card-actions class="mx-2">
                   <v-spacer></v-spacer>
                   <v-btn :disabled="!valid" color="primary" @click="sendData"
-                    >Register</v-btn
+                    >Зарегистрировать</v-btn
                   >
                 </v-card-actions>
                 <v-card-actions class="mx-2">
@@ -61,11 +53,11 @@
                     required
                   >
                     <div class="caption" slot="label">
-                      By registering you agree to our
-                      <router-link to="/terms-of-service">Terms of Service</router-link>,
-                      <router-link to="/privacy-policy">Privacy Policy</router-link>
-                      and our
-                      <router-link to="/acceptable-use-policy">Acceptable Use Policy</router-link>
+                      Регистрируясь, вы соглашаетесь с нашими
+                      <router-link to="/terms-of-service">Условиями обслуживания</router-link>,
+                      <router-link to="/privacy-policy">Политикой конфиденциальности</router-link>
+                   и
+                      <router-link to="/acceptable-use-policy">Политикой допустимого использования</router-link>
                     </div>
                   </v-checkbox>
                 </v-card-actions>
@@ -85,10 +77,9 @@
             class="text-left pa-4"
             src="../../assets/WAPP-login2.png"
           >
-            <h1 class="display-2">WAPP.ai</h1>
+            <h1 class="display-2">каблук.бел</h1>
             <p>
-              the next generation of virtual assistant driven by AI platform to
-              help customer support, lead generation and successful sales
+              начни продавать и покупать с Каспером
             </p>
           </v-img>
         </v-col>

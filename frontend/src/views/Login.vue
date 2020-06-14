@@ -4,15 +4,15 @@
       <v-row class="align-center">
         <v-col>
           <v-layout align-center justify-center column>
-            <v-card width="320" flat class="text-left">
+            <v-card width="420" flat class="text-left">
               <v-card-text>
-                Do you have an account?
-                <router-link to="/register">Sign up.</router-link>
+                У вас уже есть аккаунт?
+                <router-link to="/register">Регистрация.</router-link>
               </v-card-text>
             </v-card>
-            <v-card class="mb-5 form" width="320">
+            <v-card class="mb-5 form" width="420">
               <v-toolbar color="white justify-center" flat>
-                <v-toolbar-title>Login</v-toolbar-title>
+                <v-toolbar-title>Вход</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <logo size="74" />
               </v-toolbar>
@@ -31,7 +31,7 @@
                     v-model="password"
                     prepend-icon="lock"
                     name="input-10-1"
-                    label="Password"
+                    label="Пароль"
                     :error="inputsError"
                     :append-icon="isPasswordShown ? 'mdi-eye' : 'mdi-eye-off'"
                     :type="isPasswordShown ? 'text' : 'password'"
@@ -41,10 +41,10 @@
                 </v-card-text>
                 <div class="error" v-if="inputsError">{{ text }}</div>
                 <v-card-actions class="pa-4 justify-center">
-                  <router-link to>Forgot Password</router-link>
+                  <router-link to>Забыли пароль?</router-link>
                   <v-spacer></v-spacer>
                   <v-btn :disabled="!valid" color="primary" @click="validate">
-                    Login
+                    Вход
                   </v-btn>
                 </v-card-actions>
               </v-form>
@@ -58,11 +58,10 @@
             class="text-left pa-4"
             src="../assets/WAPP-login2.png"
           >
-            <h1 class="display-2">WAPP.ai</h1>
-            <p>
-              the next generation of virtual assistant driven by AI platform to
-              help customer support, lead generation and successful sales
-            </p>
+            <h1 class="display-2">каблук.бел</h1>
+                        <p>
+                          начни продавать и покупать с Каспером
+                        </p>
           </v-img>
         </v-col>
       </v-row>
