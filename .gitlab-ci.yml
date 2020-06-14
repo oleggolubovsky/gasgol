@@ -1,67 +1,60 @@
-image: $CI_REGISTRY/images/node:12.16.3
+image: $CI_REGISTRY/images/java:j8g63
 
 variables:
+  CI: 'False'
   CONTAINER_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  # The Gitlab Registry
   GL: "reg.atgcom.com"
+  # Docker Hub Image Name
   IMG: "username/project"
+  # Experimental: test the overlayfs docker driver.
   DOCKER_DRIVER: "overlay"
+  GRADLE_OPTS: "-Dmaven.repo.local=.gradle"
   
+
 cache:
   key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
   paths:
-    - dist/
-    - .npm/
+    - .gradle/
 
-#before_script:
-#  - mkdir -p $HOME/dist/
-
+before_script:
+  - set "CI=False"
+  - mkdir -p $HOME/.gradle/
 stages:
   - build
   - push
-  - cleanup
-  
+#  - deploy
+
 .build: &build_template
   stage: build
   script:
-    - npm install
-    - yarn build-dev
+    - gradle build
+#    - ls -la
+#    - pwd
+#    - ls -la .gradle
+#    - ls -la build
+#    - ls -la build/libs
 
 develop_build:
-  stage: build
-  script:
-    - npm install
-    - yarn build-dev
+  <<: *build_template
   only:
     - develop
   artifacts:
-    expire_in: 60 mins
+    #    expire_in: 1 day
+    expire_in: 1 hour
     paths:
-      - dist/*
+      - build/libs/wapp-backend-0.0.1.jar
 
 master_build:
-  stage: build
-  script:
-    - npm install
-    - yarn build-prod
+  <<: *build_template
   only:
     - master
+    - tags
   artifacts:
-    expire_in: 1 day
+    expire_in: 1 month
     paths:
-      - dist/*
-      
-release_build:
-  stage: build
-  script:
-    - npm install
-    - yarn build-prod
-  only:
-    - release1.0
-  artifacts:
-    expire_in: 1 day
-    paths:
-      - dist/*
-      
+      - build/libs/wapp-backend-0.0.1.jar
+
 build_image_dev:
   only:
     - develop
@@ -70,14 +63,14 @@ build_image_dev:
   script:
     - mkdir -p docker/
     - cp Dockerfile docker/
-    - cp nginx.conf docker/
-    - cp dist/* docker/ -R
-    
+    - cp supervisord.conf docker/supervisord.conf
+    - cp build/libs/wapp-backend-0.0.1.jar docker/wapp-backend.jar
     - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
-
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" docker/
+    #      - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
     - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+
 
 build_image_master:
   only:
@@ -87,34 +80,11 @@ build_image_master:
   script:
     - mkdir -p docker/
     - cp Dockerfile docker/
-    - cp dist/* docker/ -R
-    - cp nginx.conf docker/
-    
+    - cp supervisord.conf docker/supervisord.conf
+    - cp supervisord.conf docker/supervisord.conf
+    - cp build/libs/wapp-backend-0.0.1.jar docker/wapp-backend.jar
     - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
-
     - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
     - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" docker/
+    #      - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" .
     - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
-    
-build_image_release:
-  only:
-    - release1.0
-  stage: push
-  image: $CI_REGISTRY/images/docker:latest
-  script:
-    - mkdir -p docker/
-    - cp Dockerfile docker/
-    - cp dist/* docker/ -R
-    - cp nginx.conf docker/
-    
-    - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
-
-    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
-    - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" docker/
-    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
-cleanup_job:
-  stage: cleanup
-  script:
-    - echo "Cleaning up"
-    - rm -rf dist/*
-  when: always

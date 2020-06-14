@@ -1,11 +1,14 @@
-FROM reg.atgcom.com/images/node:nginx
+FROM  reg.atgcom.com/images/java:j1.8
 
-RUN mkdir -p /var/www/frontend/
-WORKDIR /var/www/frontend
-COPY . /var/www/frontend/
-VOLUME ["/var/log/nginx"]
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-RUN rm /var/www/frontend/Dockerfile && rm /var/www/frontend/nginx.conf
-EXPOSE 80 443
-CMD ["nginx", "-g", "daemon off;"]
+MAINTAINER Ilya I. "ilyuhan7@gmail.com"
+WORKDIR /app
 
+COPY ./*.jar ./
+
+#COPY public public/
+
+ADD supervisord.conf /etc/
+
+EXPOSE 8080
+
+ENTRYPOINT ["supervisord", "--nodaemon", "--configuration", "/etc/supervisord.conf"]
