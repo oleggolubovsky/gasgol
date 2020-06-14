@@ -1,0 +1,120 @@
+image: $CI_REGISTRY/images/node:12.16.3
+
+variables:
+  CONTAINER_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+  GL: "reg.atgcom.com"
+  IMG: "username/project"
+  DOCKER_DRIVER: "overlay"
+  
+cache:
+  key: "$CI_JOB_NAME-$CI_COMMIT_REF_SLUG"
+  paths:
+    - dist/
+    - .npm/
+
+#before_script:
+#  - mkdir -p $HOME/dist/
+
+stages:
+  - build
+  - push
+  - cleanup
+  
+.build: &build_template
+  stage: build
+  script:
+    - npm install
+    - yarn build-dev
+
+develop_build:
+  stage: build
+  script:
+    - npm install
+    - yarn build-dev
+  only:
+    - develop
+  artifacts:
+    expire_in: 60 mins
+    paths:
+      - dist/*
+
+master_build:
+  stage: build
+  script:
+    - npm install
+    - yarn build-prod
+  only:
+    - master
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - dist/*
+      
+release_build:
+  stage: build
+  script:
+    - npm install
+    - yarn build-prod
+  only:
+    - release1.0
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - dist/*
+      
+build_image_dev:
+  only:
+    - develop
+  stage: push
+  image: $CI_REGISTRY/images/docker:latest
+  script:
+    - mkdir -p docker/
+    - cp Dockerfile docker/
+    - cp nginx.conf docker/
+    - cp dist/* docker/ -R
+    
+    - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
+
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" docker/
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+
+build_image_master:
+  only:
+    - master
+  stage: push
+  image: $CI_REGISTRY/images/docker:latest
+  script:
+    - mkdir -p docker/
+    - cp Dockerfile docker/
+    - cp dist/* docker/ -R
+    - cp nginx.conf docker/
+    
+    - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
+
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" docker/
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+    
+build_image_release:
+  only:
+    - release1.0
+  stage: push
+  image: $CI_REGISTRY/images/docker:latest
+  script:
+    - mkdir -p docker/
+    - cp Dockerfile docker/
+    - cp dist/* docker/ -R
+    - cp nginx.conf docker/
+    
+    - export IMAGE_TAG=$(echo -en $CI_COMMIT_REF_NAME | tr -c '[:alnum:]_.-' '-')
+
+    - docker login -u "gitlab-ci-token" -p "$CI_JOB_TOKEN" $CI_REGISTRY
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$IMAGE_TAG" docker/
+    - docker push "$CI_REGISTRY_IMAGE:$IMAGE_TAG"
+cleanup_job:
+  stage: cleanup
+  script:
+    - echo "Cleaning up"
+    - rm -rf dist/*
+  when: always
